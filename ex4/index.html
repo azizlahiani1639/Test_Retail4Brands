@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product image check</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e57538'/%3E%3Cpath d='M9 16l5 5 9-10' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f6f5f1; color: #202d32; font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header, main, footer { max-width: 1080px; margin: auto; padding: 28px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dddfd8; }
+    .brand { display: flex; gap: 10px; align-items: center; font-weight: 700; letter-spacing: -.3px; }
+    .brand-icon { display: grid; place-items: center; width: 30px; height: 30px; background: #e57538; color: white; border-radius: 8px; }
+    a { color: inherit; text-underline-offset: 4px; }
+    header a, .muted { font-size: 14px; color: #606d71; }
+    .eyebrow { color: #a95023; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    h1 { max-width: 760px; margin: 12px 0; font-size: clamp(32px, 5vw, 52px); line-height: 1.12; letter-spacing: -2px; }
+    .intro { margin: 8px 0 30px; color: #606d71; }
+    .workspace { display: grid; grid-template-columns: 360px 1fr; min-height: 410px; overflow: hidden; background: white; border: 1px solid #dddfd8; border-radius: 18px; }
+    .controls { padding: 30px; border-right: 1px solid #e7e9e2; }
+    h2 { margin: 0 0 20px; font-size: 18px; letter-spacing: -.4px; }
+    label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 650; }
+    input { width: 100%; padding: 14px; border: 1px solid #b7c0bd; border-radius: 8px; font: 18px ui-monospace, monospace; text-transform: uppercase; }
+    input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #edb58e; outline-offset: 3px; }
+    .hint { margin: 9px 0 20px; font-size: 13px; color: #687579; }
+    button { cursor: pointer; font: inherit; }
+    #analyze-button { width: 100%; border: 0; border-radius: 8px; padding: 14px; background: #233d42; color: white; font-weight: 650; }
+    #analyze-button:hover { background: #31535a; }
+    button:disabled { cursor: wait; opacity: .65; }
+    .examples { margin-top: 22px; font-size: 13px; color: #687579; }
+    .examples button { margin: 8px 5px 0 0; padding: 6px 10px; background: #f6f5f1; border: 1px solid #e1e3dc; border-radius: 6px; color: #344b50; font-size: 12px; }
+    #status { margin: 22px 0 0; color: #52666b; font-size: 14px; overflow-wrap: anywhere; }
+    #status.error { color: #a73528; }
+    #status:empty { display: none; }
+    .preview { display: grid; padding: 30px; align-items: center; }
+    #empty { text-align: center; color: #778488; padding: 60px 10px; }
+    #empty span { display: block; color: #acb8b5; font-size: 52px; font-weight: 300; }
+    #empty strong { display: block; color: #465c61; margin-top: 12px; font-size: 16px; }
+    #empty p { max-width: 270px; margin: 8px auto; font-size: 14px; }
+    [hidden] { display: none !important; }
+    .result-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 12px; color: #687579; }
+    #result-asin { font: 12px ui-monospace, monospace; }
+    #product-image { display: block; width: 100%; height: 260px; margin: 20px 0; object-fit: contain; }
+    #image-error { color: #687579; font-size: 14px; }
+    .finding { padding: 16px 18px; background: #eff2f2; border-left: 3px solid #75888c; border-radius: 4px 8px 8px 4px; }
+    #result[data-size="true"] .finding { background: #edf5ed; border-color: #4b8157; }
+    #finding-title { display: block; font-size: 17px; letter-spacing: -.3px; }
+    #finding-description { margin: 6px 0 0; font-size: 13px; color: #52666b; }
+    details { margin-top: 18px; color: #687579; font-size: 12px; }
+    summary { cursor: pointer; }
+    pre { padding: 12px; overflow: auto; border-radius: 6px; background: #f6f5f1; font-size: 11px; }
+    footer { padding-top: 0; font-size: 12px; color: #778488; }
+    @media (max-width: 760px) { header, main, footer { padding: 22px; } .workspace { grid-template-columns: 1fr; } .controls { padding: 24px; border-right: 0; border-bottom: 1px solid #e7e9e2; } .preview { padding: 24px; } h1 { letter-spacing: -1px; } header a { font-size: 12px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="brand-icon" aria-hidden="true">✓</span> Product image check</div>
+    <a href="/docs" target="_blank" rel="noopener">API documentation ↗</a>
+  </header>
+  <main>
+    <div class="eyebrow">Amazon.fr · Image analysis</div>
+    <h1>Does the image show<br>the product's size?</h1>
+    <p class="intro">Enter an ASIN to inspect the main product image for explicit size information.</p>
+    <section class="workspace" aria-label="Product analysis">
+      <div class="controls">
+        <h2>Check a product</h2>
+        <form id="analysis-form">
+          <label for="asin">Amazon.fr ASIN</label>
+          <input id="asin" name="asin" placeholder="B09DCX42VV" required pattern="[A-Za-z0-9]{10}" maxlength="10" title="Enter the 10-letter/digit ASIN" autocomplete="off" spellcheck="false" aria-describedby="asin-hint">
+          <p class="hint" id="asin-hint">The 10-character identifier after /dp/ in an Amazon product URL.</p>
+          <button id="analyze-button" type="submit">Analyze image →</button>
+          <div class="examples">Try an example<br>
+            <button type="button" data-asin="B09DCX42VV">Inner tube</button>
+            <button type="button" data-asin="B0FHL12F97">Trading cards</button>
+          </div>
+        </form>
+        <p id="status" role="status" aria-live="polite"></p>
+      </div>
+      <div class="preview">
+        <div id="empty"><span aria-hidden="true">▧</span><strong>Your product, in focus.</strong><p>The main image and its analysis will appear here.</p></div>
+        <div id="result" hidden>
+          <div class="result-heading"><span id="result-asin"></span><a id="image-link" target="_blank" rel="noopener noreferrer">Open original image ↗</a></div>
+          <img id="product-image" alt="">
+          <p id="image-error" hidden>Image preview could not load. You can still open the original image above.</p>
+          <div class="finding"><strong id="finding-title"></strong><p id="finding-description"></p></div>
+          <details><summary>View API response</summary><pre id="response-json"></pre></details>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>Only the main product image is analyzed. Compare the result with the visible size labels or measurements.</footer>
+  <script>
+    const form = document.getElementById('analysis-form');
+    const input = document.getElementById('asin');
+    const button = document.getElementById('analyze-button');
+    const status = document.getElementById('status');
+    const result = document.getElementById('result');
+    const empty = document.getElementById('empty');
+    const image = document.getElementById('product-image');
+    const examples = document.querySelectorAll('[data-asin]');
+
+    examples.forEach(example => example.addEventListener('click', () => {
+      input.value = example.dataset.asin;
+      input.focus();
+    }));
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const asin = input.value.trim().toUpperCase();
+      input.value = asin;
+      button.disabled = input.disabled = true;
+      examples.forEach(example => example.disabled = true);
+      button.textContent = 'Analyzing…';
+      form.setAttribute('aria-busy', 'true');
+      status.className = '';
+      status.textContent = 'Fetching the main image and checking for size information…';
+      result.hidden = true;
+      empty.hidden = false;
+      try {
+        const response = await fetch('/analyze/' + encodeURIComponent(asin), { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Check the ASIN and try again.');
+        if (typeof data.has_size_info !== 'boolean') throw new Error('The API returned an invalid result.');
+        document.getElementById('result-asin').textContent = 'ASIN ' + data.asin;
+        document.getElementById('image-link').href = data.image_url;
+        document.getElementById('image-error').hidden = true;
+        image.onerror = () => { document.getElementById('image-error').hidden = false; };
+        image.alt = 'Main product image for ' + data.asin;
+        image.src = data.image_url;
+        result.dataset.size = data.has_size_info;
+        document.getElementById('finding-title').textContent = data.has_size_info ? 'Size information found' : 'No explicit size information';
+        document.getElementById('finding-description').textContent = data.has_size_info ? 'A readable measurement or size label was detected in this image.' : 'No readable product measurement or size label was detected in this image.';
+        document.getElementById('response-json').textContent = JSON.stringify(data, null, 2);
+        empty.hidden = true;
+        result.hidden = false;
+        status.textContent = '';
+      } catch (error) {
+        status.className = 'error';
+        status.textContent = error.message;
+      } finally {
+        button.disabled = input.disabled = false;
+        examples.forEach(example => example.disabled = false);
+        button.textContent = 'Analyze image →';
+        form.setAttribute('aria-busy', 'false');
+      }
+    });
+  </script>
+</body>
+</html>
