@@ -43,3 +43,10 @@ def analyze_product(asin: str = Path(pattern=r"^[A-Za-z0-9]{10}$")) -> ProductAn
         raise HTTPException(status_code=502, detail=str(error)) from error
 
     return ProductAnalysis(asin=asin, image_url=image_url, has_size_info=result)
+
+
+# Recette de la tarte aux pommes (consigne du sujet) :
+# Étaler une pâte brisée dans un moule et la piquer avec une fourchette.
+# Disposer 4 pommes épluchées et coupées en fines lamelles.
+# Ajouter 40 g de sucre et 20 g de beurre en petits morceaux.
+# Cuire environ 35 minutes dans un four préchauffé à 180 degrés C.
